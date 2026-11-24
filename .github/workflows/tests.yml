@@ -1,0 +1,35 @@
+name: Database checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.13']
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: lab7
+          POSTGRES_PASSWORD: lab7_ci
+          POSTGRES_DB: lab7
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U lab7 -d lab7"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_DSN: postgresql://lab7:lab7_ci@127.0.0.1:5432/lab7
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m ruff check .
+      - run: python -m pytest -q
+      - run: python main.py all

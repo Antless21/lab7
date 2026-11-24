@@ -1,0 +1,18 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: lab7
+      POSTGRES_PASSWORD: lab7_local
+      POSTGRES_DB: lab7
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - lab7_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lab7 -d lab7"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+volumes:
+  lab7_data:
